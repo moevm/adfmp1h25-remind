@@ -23,10 +23,15 @@ import com.example.remind.R
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.sp
+import kotlin.math.exp
 
 
 @Composable
@@ -47,7 +52,9 @@ fun NewTaskLayout() {
                 .padding(bottom = 16.dp, top = 40.dp)
                 .align(alignment = Alignment.Start)
         )
-        EditNumberField(modifier = Modifier.padding(bottom = 32.dp).fillMaxWidth(),name = R.string.task_name)
+        EditField(modifier = Modifier
+            .padding(bottom = 32.dp)
+            .fillMaxWidth(),name = R.string.task_name)
         Text(
             text = stringResource(R.string.category_name),
             fontSize = 20.sp,
@@ -55,8 +62,10 @@ fun NewTaskLayout() {
                 .padding(bottom = 13.dp, top = 20.dp)
                 .align(alignment = Alignment.Start)
         )
-        EditNumberField(modifier = Modifier.padding(bottom = 32.dp).fillMaxWidth(), name = R.string.category_name)
-//        Spacer(modifier = Modifier.height(150.dp))
+        dropMenu(modifier = Modifier
+            .padding(bottom = 32.dp)
+            .fillMaxWidth(), name = R.string.category_name)
+        Spacer(modifier = Modifier.height(150.dp))
         Button(
             onClick = {},
             modifier = Modifier
@@ -75,17 +84,82 @@ fun NewTaskLayout() {
 
 
 @Composable
-fun EditNumberField(modifier: Modifier = Modifier, name: Int) {
+fun EditField(modifier: Modifier = Modifier, name: Int) {
     var nameInput by remember { mutableStateOf("") }
     OutlinedTextField(
         value = nameInput,
         onValueChange = {nameInput = it},
         singleLine = true,
+        textStyle = TextStyle.Default.copy(fontSize = 20.sp),
 
 //        label = { Text(stringResource(name)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         modifier = modifier
     )
+}
+
+@Composable
+fun dropMenu(modifier: Modifier = Modifier, name: Int) {
+    var expanded by remember { mutableStateOf(false) }
+    val items = listOf("Быт", "Учеба", "Работа")
+    var selectedItem by remember{ mutableStateOf(items[0]) }
+    var searchQuery by remember{ mutableStateOf("") }
+    val filteredItems = items.filter { it.contains(searchQuery, ignoreCase = true) }
+    Box{
+        OutlinedButton(
+            onClick = {expanded=true} ,
+
+            modifier = Modifier
+                .fillMaxSize()
+                .size(53.dp)
+                .align(alignment = Alignment.CenterStart),
+            shape = RoundedCornerShape(5.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0x0))
+
+
+        ){
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ){
+                Text(
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Start,
+                    text = selectedItem,
+                    fontSize = 20.sp,
+                    color = Color(0xFF000000),
+                    style = TextStyle.Default.copy(fontSize = 20.sp)
+                )
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Развернуть список",
+                    tint = Color.Black,
+                    modifier = Modifier.size(15.dp)
+                )
+            }
+
+        }
+        DropdownMenu(
+            expanded= expanded,
+            onDismissRequest = {expanded=false},
+            offset= DpOffset(0.dp, 0.dp)
+        ) {
+            TextField(
+                value = searchQuery,
+                onValueChange = {searchQuery = it}
+            )
+            filteredItems.forEach {item ->
+            DropdownMenuItem(
+                text = {Text(item)},
+                onClick = {
+                    selectedItem = item
+                    expanded = false
+                }
+                )
+            }
+        }
+    }
 }
 
 
