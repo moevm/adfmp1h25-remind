@@ -23,6 +23,7 @@ import com.example.remind.R
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -132,10 +133,10 @@ fun dropMenu(modifier: Modifier = Modifier, name: Int) {
                     style = TextStyle.Default.copy(fontSize = 20.sp)
                 )
                 Icon(
-                    imageVector = Icons.Default.Add,
+                    imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = "Развернуть список",
                     tint = Color.Black,
-                    modifier = Modifier.size(15.dp)
+                    modifier = Modifier.size(30.dp)
                 )
             }
 
