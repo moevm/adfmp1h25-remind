@@ -25,7 +25,8 @@ fun MainScreen(navController: NavController) {
             if (tasks.isEmpty()) {
                 EmptyScreen(onAddClick = { tasks = tasks + "Новое дело" })
             } else {
-                TaskListScreen(tasks)
+                NewTaskLayout()
+                //TaskListScreen(tasks)
             }
         }
     }
