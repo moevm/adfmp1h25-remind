@@ -105,7 +105,7 @@ fun dropMenu(modifier: Modifier = Modifier, name: Int) {
     val items = listOf("Быт", "Учеба", "Работа")
     var selectedItem by remember{ mutableStateOf(items[0]) }
     var searchQuery by remember{ mutableStateOf("") }
-    val filteredItems = items.filter { it.contains(searchQuery, ignoreCase = true) }
+    val sortedItems = items.sortedBy { it.toString() }
     Box{
         OutlinedButton(
             onClick = {expanded=true} ,
@@ -125,7 +125,7 @@ fun dropMenu(modifier: Modifier = Modifier, name: Int) {
                 horizontalArrangement = Arrangement.SpaceBetween
             ){
                 Text(
-                    modifier = Modifier.weight(1f),
+//                    modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Start,
                     text = selectedItem,
                     fontSize = 20.sp,
@@ -144,15 +144,16 @@ fun dropMenu(modifier: Modifier = Modifier, name: Int) {
         DropdownMenu(
             expanded= expanded,
             onDismissRequest = {expanded=false},
-            offset= DpOffset(0.dp, 0.dp)
+//            modifier = Modifier.width(),
+//            offset= DpOffset(0.dp, 0.dp),
+
         ) {
-            TextField(
-                value = searchQuery,
-                onValueChange = {searchQuery = it}
-            )
-            filteredItems.forEach {item ->
+            sortedItems.forEach {item ->
             DropdownMenuItem(
-                text = {Text(item)},
+                text = {Text(
+                    text = item,
+                    style = TextStyle.Default.copy(fontSize = 20.sp)
+                    )},
                 onClick = {
                     selectedItem = item
                     expanded = false
