@@ -97,7 +97,7 @@ fun NewTaskLayout(navController: NavController) {
             .fillMaxWidth(), name = R.string.category_name)
         Spacer(modifier = Modifier.height(150.dp))
         Button(
-            onClick = {},
+            onClick = {navController.navigate("main")},
             modifier = Modifier
                 .fillMaxSize()
                 .size(53.dp),
