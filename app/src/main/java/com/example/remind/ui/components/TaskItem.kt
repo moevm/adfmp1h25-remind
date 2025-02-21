@@ -1,5 +1,8 @@
 package com.example.remind.ui.components
 
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -15,12 +18,29 @@ import androidx.compose.ui.unit.sp
 import com.example.remind.R
 import com.example.remind.ui.models.Task
 import java.text.SimpleDateFormat
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.ui.graphics.asImageBitmap
+import com.example.remind.ui.pages.CameraScreen
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
 fun TaskItem(task: Task, onTaskUpdated: (Task) -> Unit) {
+    var showCamera by remember { mutableStateOf(false)}
+    if (showCamera) {
+        CameraScreen(
+            onImageCaptured = { path ->
+                val updatedTask = task.copy(
+                    image = path,
+                    imageDate = LocalDateTime.now().toString()
+                )
+                onTaskUpdated(updatedTask)
+            },
+            onClose = { showCamera = false }
+        )
+    }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -73,11 +93,41 @@ fun TaskItem(task: Task, onTaskUpdated: (Task) -> Unit) {
                 Text("Отмечено ${task.completedAt}", fontSize = 12.sp, color = Color.Gray)
             }
         }
+        IconButton(
+            onClick = { showCamera = true },
+            modifier = Modifier.padding(start = 8.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Favorite,
+                contentDescription = "Добавить фото",
+                tint = Color.DarkGray
+            )
+        }
+        task.image?.let {
+            ImagePreview(path = it)
+        }
     }
 }
 fun getCurrentTime(): String {
-    val calendar = Calendar.getInstance() // Это получает календарь с текущим временем и временной зоной устройства
+    val calendar = Calendar.getInstance()
     val dateFormat = SimpleDateFormat("dd.MM HH:mm", Locale.getDefault())
-    dateFormat.timeZone = calendar.timeZone // Устанавливаем временную зону форматтера такую же, как у календаря
+    dateFormat.timeZone = calendar.timeZone
     return dateFormat.format(calendar.time)
+}
+
+@Composable
+fun ImagePreview(path: String) {
+    val bitmap = remember {
+        BitmapFactory.decodeFile(path)?.let {
+            Bitmap.createScaledBitmap(it, 100, 100, true)
+        }
+    }
+
+    bitmap?.let {
+        Image(
+            bitmap = it.asImageBitmap(),
+            contentDescription = "Превью фото",
+            modifier = Modifier.size(50.dp)
+        )
+    }
 }

@@ -2,24 +2,28 @@ package com.example.remind.ui.pages
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
+import com.example.remind.data.FileManager
 import com.example.remind.ui.components.TabBar
 import com.example.remind.ui.models.Task
 @Composable
 fun MainScreen(navController: NavController) {
-    var tasks by remember {
-        mutableStateOf(
-            listOf(
-                Task(1, "Выключить утюг", false, null, "Бытовые задачи"),
-                Task(2, "Купить молоко", true, "12.02 13:03", "Бытовые задачи"),
-                Task(3, "Позвонить в банк", false, null, "Рабочие задачи"),
-                Task(4, "Сделать отчёт", true, "11.02 16:30", "Рабочие задачи")
-            )
-        )
+    val context = LocalContext.current
+    var tasks by remember { mutableStateOf(emptyList<Task>()) }
+    var isLoading by remember { mutableStateOf(true) }
+
+    LaunchedEffect(Unit) {
+        val fileManager = FileManager()
+        tasks = fileManager.loadTasksFromFile(context)
+        isLoading = false
     }
+
 
     Scaffold(
         bottomBar = {
@@ -30,15 +34,24 @@ fun MainScreen(navController: NavController) {
         }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-            if (tasks.isEmpty()) {
-                EmptyScreen(navController = navController)
-            } else {
-                TaskListScreen(
-                    tasks = tasks,
-                    onUpdateTasks = { updatedTasks ->
-                        tasks = updatedTasks
-                    }
-                )
+            when {
+                isLoading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                tasks.isEmpty() -> {
+                    EmptyScreen(navController = navController)
+                }
+                else -> {
+                    TaskListScreen(
+                        tasks = tasks,
+                        onUpdateTasks = { updatedTasks ->
+                            tasks = updatedTasks
+                            FileManager().saveTasksToFile(context, updatedTasks)
+                        }
+                    )
+                }
             }
         }
     }

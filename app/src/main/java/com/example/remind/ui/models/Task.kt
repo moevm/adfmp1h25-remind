@@ -5,5 +5,7 @@ data class Task(
     val title: String,
     var isCompleted: Boolean,
     var completedAt: String?,
-    val category: String
+    val category: String,
+    val image: String?,
+    val imageDate: String?
 )

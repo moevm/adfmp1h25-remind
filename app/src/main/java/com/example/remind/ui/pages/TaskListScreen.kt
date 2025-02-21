@@ -12,6 +12,7 @@ import com.example.remind.R
 import com.example.remind.ui.components.TaskCategory
 import com.example.remind.ui.models.Task
 import androidx.compose.ui.Alignment
+import java.time.LocalDateTime
 
 @Composable
 fun TaskListScreen(tasks: List<Task>, onUpdateTasks: (List<Task>) -> Unit) {
@@ -37,13 +38,13 @@ fun TaskListScreen(tasks: List<Task>, onUpdateTasks: (List<Task>) -> Unit) {
             )
 
             Row {
-                IconButton(onClick = { /* TODO: добавить фильтр */ }) {
+                IconButton(onClick = { /* Фильтрация */ }) {
                     Image(
                         painter = painterResource(id = R.drawable.filter),
                         contentDescription = "Фильтр"
                     )
                 }
-                IconButton(onClick = { /* TODO: добавить сортировку */ }) {
+                IconButton(onClick = { /* Сортировка */ }) {
                     Image(
                         painter = painterResource(id = R.drawable.sort),
                         contentDescription = "Сортировка"
@@ -61,6 +62,7 @@ fun TaskListScreen(tasks: List<Task>, onUpdateTasks: (List<Task>) -> Unit) {
         ) {
             Text("Сбросить все отметки")
         }
+
         LazyColumn {
             groupedTasks.forEach { (category, tasksInCategory) ->
                 item(key = category) {
@@ -70,7 +72,9 @@ fun TaskListScreen(tasks: List<Task>, onUpdateTasks: (List<Task>) -> Unit) {
                         onTaskUpdated = { updatedTask ->
                             val index = tasksState.indexOfFirst { it.id == updatedTask.id }
                             if (index != -1) {
-                                tasksState[index] = updatedTask
+                                tasksState[index] = updatedTask.apply {
+                                    completedAt = if (isCompleted) LocalDateTime.now().toString() else null
+                                }
                                 onUpdateTasks(tasksState.toList())
                             }
                         }
