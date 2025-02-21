@@ -12,20 +12,20 @@ fun TaskListScreen(tasks: List<String>) {
     val isEmpty = tasks.isEmpty()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (isEmpty) {
-            EmptyScreen(onAddClick = {
-
-            })
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
-                items(tasks) { task ->
-                    Text(
-                        text = task,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-            }
-        }
+//        if (isEmpty) {
+//            EmptyScreen(onAddClick = {
+//
+//            })
+//        } else {
+//            LazyColumn(modifier = Modifier.fillMaxSize()) {
+//                items(tasks) { task ->
+//                    Text(
+//                        text = task,
+//                        style = MaterialTheme.typography.bodyLarge,
+//                        modifier = Modifier.padding(8.dp)
+//                    )
+//                }
+//            }
+//        }
     }
 }

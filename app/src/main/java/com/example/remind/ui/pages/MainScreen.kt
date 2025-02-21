@@ -10,23 +10,22 @@ import com.example.remind.ui.components.TabBar
 
 @Composable
 fun MainScreen(navController: NavController) {
-    var tasks by remember { mutableStateOf(listOf<String>()) }
+    val tasks by remember { mutableStateOf(listOf<String>()) }
 
     Scaffold(
         bottomBar = {
             TabBar(
                 isEmpty = tasks.isEmpty(),
-                onAddClick = { tasks = tasks + "Новое дело" },
                 navController = navController
             )
         }
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
             if (tasks.isEmpty()) {
-                EmptyScreen(onAddClick = { tasks = tasks + "Новое дело" })
+                EmptyScreen(navController = navController)
             } else {
-                NewTaskLayout()
-                //TaskListScreen(tasks)
+                //NewTaskLayout()
+                TaskListScreen(tasks)
             }
         }
     }
