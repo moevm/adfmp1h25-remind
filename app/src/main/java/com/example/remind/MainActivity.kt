@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
                     MainScreen(navController)
                 }
                 composable("addTask") {
-                    NewTaskLayout()
+                    NewTaskLayout(navController)
                 }
                 composable("about") {
                     AboutScreen(navController)

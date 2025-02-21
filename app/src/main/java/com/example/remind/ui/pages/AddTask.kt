@@ -22,21 +22,25 @@ import androidx.compose.ui.unit.dp
 import com.example.remind.R
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import kotlin.math.exp
 
 
 @Composable
-fun NewTaskLayout() {
+fun NewTaskLayout(navController: NavController) {
     Column(
         modifier = Modifier
             .statusBarsPadding()
@@ -46,6 +50,31 @@ fun NewTaskLayout() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        TextButton(
+            onClick= {navController.navigate("main")},
+            contentPadding = PaddingValues(0.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(0.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Start
+            ){
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Назад",
+                    tint = Color.Black,
+                    modifier = Modifier.padding(end = 15.dp).size(25.dp)
+                )
+                Text("Новое дело",
+                    fontSize = 23.sp,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Medium
+                )
+            }
+
+        }
         Text(
             text = stringResource(R.string.task_name),
             fontSize = 20.sp,
@@ -77,6 +106,7 @@ fun NewTaskLayout() {
         ) {
             Text(
                 fontSize = 20.sp,
+                color = Color.Black,
                 text = stringResource(R.string.button_add_task),
             )
         }
@@ -104,7 +134,6 @@ fun dropMenu(modifier: Modifier = Modifier, name: Int) {
     var expanded by remember { mutableStateOf(false) }
     val items = listOf("Быт", "Учеба", "Работа")
     var selectedItem by remember{ mutableStateOf(items[0]) }
-    var searchQuery by remember{ mutableStateOf("") }
     val sortedItems = items.sortedBy { it.toString() }
     Box{
         OutlinedButton(
@@ -165,9 +194,9 @@ fun dropMenu(modifier: Modifier = Modifier, name: Int) {
 }
 
 
-
-@Preview(showBackground = true)
-@Composable
-fun Preview() {
-    NewTaskLayout()
-}
+//
+//@Preview(showBackground = true)
+//@Composable
+//fun Preview() {
+//    NewTaskLayout()
+//}
