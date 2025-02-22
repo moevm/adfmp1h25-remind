@@ -15,7 +15,11 @@ import androidx.compose.ui.Alignment
 import java.time.LocalDateTime
 
 @Composable
-fun TaskListScreen(tasks: List<Task>, onUpdateTasks: (List<Task>) -> Unit) {
+fun TaskListScreen(
+    tasks: List<Task>,
+    onUpdateTasks: (List<Task>) -> Unit,
+    onOpenCamera: (Int) -> Unit
+) {
     val tasksState = remember(tasks) { tasks.toMutableStateList() }
     val hasCompletedTasks = tasksState.any { it.isCompleted }
     val groupedTasks = tasksState.groupBy { it.category }
@@ -77,7 +81,8 @@ fun TaskListScreen(tasks: List<Task>, onUpdateTasks: (List<Task>) -> Unit) {
                                 }
                                 onUpdateTasks(tasksState.toList())
                             }
-                        }
+                        },
+                        onOpenCamera = { taskId -> onOpenCamera(taskId) }
                     )
                 }
             }

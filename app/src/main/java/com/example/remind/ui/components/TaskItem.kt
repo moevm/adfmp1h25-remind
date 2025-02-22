@@ -21,26 +21,16 @@ import java.text.SimpleDateFormat
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.ui.graphics.asImageBitmap
-import com.example.remind.ui.pages.CameraScreen
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
-fun TaskItem(task: Task, onTaskUpdated: (Task) -> Unit) {
-    var showCamera by remember { mutableStateOf(false)}
-    if (showCamera) {
-        CameraScreen(
-            onImageCaptured = { path ->
-                val updatedTask = task.copy(
-                    image = path,
-                    imageDate = LocalDateTime.now().toString()
-                )
-                onTaskUpdated(updatedTask)
-            },
-            onClose = { showCamera = false }
-        )
-    }
+fun TaskItem(
+    task: Task,
+    onTaskUpdated: (Task) -> Unit,
+    onOpenCamera: (Int) -> Unit
+) {
+    var showPhotoPicker by remember { mutableStateOf(false) }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -93,8 +83,9 @@ fun TaskItem(task: Task, onTaskUpdated: (Task) -> Unit) {
                 Text("Отмечено ${task.completedAt}", fontSize = 12.sp, color = Color.Gray)
             }
         }
+
         IconButton(
-            onClick = { showCamera = true },
+            onClick = { showPhotoPicker = true },
             modifier = Modifier.padding(start = 8.dp)
         ) {
             Icon(
@@ -103,17 +94,34 @@ fun TaskItem(task: Task, onTaskUpdated: (Task) -> Unit) {
                 tint = Color.DarkGray
             )
         }
+
         task.image?.let {
             ImagePreview(path = it)
         }
     }
+
+    if (showPhotoPicker) {
+        PhotoPickerSheet(
+            onDismiss = { showPhotoPicker = false },
+            onPickGallery = {
+                showPhotoPicker = false
+                // TODO: Добавить обработку выбора из галереи
+            },
+            onTakePhoto = {
+                showPhotoPicker = false
+                onOpenCamera(task.id)
+            }
+        )
+    }
 }
+
 fun getCurrentTime(): String {
     val calendar = Calendar.getInstance()
     val dateFormat = SimpleDateFormat("dd.MM HH:mm", Locale.getDefault())
     dateFormat.timeZone = calendar.timeZone
     return dateFormat.format(calendar.time)
 }
+
 
 @Composable
 fun ImagePreview(path: String) {
