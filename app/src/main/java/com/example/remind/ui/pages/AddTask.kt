@@ -19,8 +19,10 @@ import com.example.remind.R
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -30,6 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.remind.data.FileManager
 import com.example.remind.ui.models.Task
 
@@ -71,7 +74,7 @@ fun NewTaskLayout(navController: NavController) {
                         .padding(end = 15.dp)
                         .size(25.dp)
                 )
-                Text("Новое дело",
+                Text("Добавить задачу",
                     fontSize = 23.sp,
                     color = Color.Black,
                     fontWeight = FontWeight.Medium
@@ -111,8 +114,8 @@ fun NewTaskLayout(navController: NavController) {
             items = existingCategories
         )
 
-        Spacer(modifier = Modifier.height(150.dp))
         AddCategory(context=context, fileManager=fileManager, onCreateCategory = {data-> category = data})
+        Spacer(modifier = Modifier.height(50.dp))
         Button(
             onClick = {
                 val newTask = Task(
@@ -153,7 +156,7 @@ fun EditField(modifier: Modifier = Modifier, name: Int, value: String, onValueCh
         value = value,
         onValueChange = onValueChange,
         singleLine = true,
-        textStyle = TextStyle.Default.copy(fontSize = 20.sp),
+        textStyle = TextStyle.Default.copy(fontSize = 18.sp),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         modifier = modifier
     )
@@ -184,7 +187,7 @@ fun DropMenu(modifier: Modifier = Modifier, items: List<String>, selectedItem: S
                 Text(
                     textAlign = TextAlign.Start,
                     text = selectedItem,
-                    fontSize = 20.sp,
+                    fontSize = 18.sp,
                     color = Color(0xFF000000),
                     style = TextStyle.Default.copy(fontSize = 20.sp)
                 )
@@ -232,33 +235,58 @@ fun AddCategory(
 ){
     val openDialog = remember { mutableStateOf(false) }
     var newCategory by remember { mutableStateOf("") }
-    Button(
-        onClick = { openDialog.value = true }
+    TextButton(
+        onClick = { openDialog.value = true },
+        contentPadding = PaddingValues(0.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 10.dp)
     ) {
-        Text("Добавить категорию")
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start
+        ) {
+            Icon(
+                imageVector = Icons.Default.AddCircle,
+                contentDescription = "Добавить",
+                tint = Color(0xFF8C9A80),
+                modifier = Modifier
+                    .padding(end = 5.dp)
+                    .size(30.dp)
+            )
+            Text(
+                text = "Добавить категорию",
+                color = Color(0xFF728066),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Normal
+
+                )
+            }
     }
     if(openDialog.value){
         Dialog(onDismissRequest = { openDialog.value = false }) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(250.dp)
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
+                    .height(180.dp)
+                    .padding(0.dp),
+                shape = RectangleShape,
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                    horizontalAlignment = Alignment.Start,
                 ) {
                     Text(
                         text = "Новая категория",
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier.padding(start = 20.dp, top=20.dp),
+                        fontSize = 23.sp
                     )
                     EditField(modifier = Modifier
-                        .padding(bottom = 15.dp)
-                        .width(250.dp),
+                        .padding(bottom = 5.dp, top = 10.dp, start = 20.dp)
+                        .width(280.dp),
                         value = newCategory,
                         name = R.string.category_name,
                         onValueChange = { newCategory = it })
@@ -271,7 +299,10 @@ fun AddCategory(
                             onClick = { openDialog.value = false },
                             modifier = Modifier.padding(15.dp),
                         ) {
-                            Text("Отмена")
+                            Text(
+                                text = "ОТМЕНА",
+                                fontSize = 15.sp,
+                                color = Color.Black)
                         }
                         TextButton(
                             onClick = {
@@ -284,7 +315,10 @@ fun AddCategory(
                                 },
                             modifier = Modifier.padding(15.dp),
                         ) {
-                            Text("Создать")
+                            Text(
+                                text = "СОХРАНИТЬ",
+                                fontSize = 15.sp,
+                                color = Color.Black)
                         }
                     }
                 }
@@ -295,8 +329,9 @@ fun AddCategory(
 
 
 
-//@Preview(showBackground = true)
-//@Composable
-//fun Preview() {
-//    AddCategory()
-//}
+@Preview(showBackground = true)
+@Composable
+fun Preview() {
+    val navController = rememberNavController()
+    NewTaskLayout(navController)
+}
