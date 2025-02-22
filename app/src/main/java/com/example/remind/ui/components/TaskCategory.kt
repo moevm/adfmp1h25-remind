@@ -14,16 +14,25 @@ import androidx.compose.ui.unit.dp
 import com.example.remind.ui.models.Task
 
 @Composable
-fun TaskCategory(category: String, tasks: List<Task>, onTaskUpdated: (Task) -> Unit) {
+fun TaskCategory(
+    category: String,
+    tasks: List<Task>,
+    onTaskUpdated: (Task) -> Unit,
+    onOpenCamera: (Int) -> Unit
+) {
     var isExpanded by remember { mutableStateOf(true) }
     val tasksState = remember(tasks) { tasks.toMutableStateList() }
 
-    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+    ) {
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { isExpanded = !isExpanded }
-                .background(Color(0xFFEFEFEF)), // Цвет заголовка
+                .background(Color(0xFFEFEFEF)),
             tonalElevation = 4.dp
         ) {
             Row(modifier = Modifier.padding(12.dp)) {
@@ -47,14 +56,11 @@ fun TaskCategory(category: String, tasks: List<Task>, onTaskUpdated: (Task) -> U
                                 tasksState[index] = updatedTask
                                 onTaskUpdated(updatedTask)
                             }
-                        }
+                        },
+                        onOpenCamera = { onOpenCamera(task.id) }
                     )
                 }
             }
         }
     }
 }
-
-
-
-
