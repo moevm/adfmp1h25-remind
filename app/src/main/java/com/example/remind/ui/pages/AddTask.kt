@@ -4,15 +4,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -23,23 +18,18 @@ import com.example.remind.R
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import com.example.remind.data.FileManager
 import com.example.remind.ui.models.Task
-import kotlin.math.exp
 
 
 @Composable
@@ -110,13 +100,12 @@ fun NewTaskLayout(navController: NavController) {
             modifier = Modifier
                 .padding(bottom = 32.dp)
                 .fillMaxWidth(),
-            name = R.string.category_name,
             selectedItem = category,
             onItemSelected = { category = it }
         )
 
         Spacer(modifier = Modifier.height(150.dp))
-
+        AddCategory()
         Button(
             onClick = {
                 val newTask = Task(
@@ -166,10 +155,10 @@ fun EditField(modifier: Modifier = Modifier, name: Int, value: String, onValueCh
 
 
 @Composable
-fun DropMenu(modifier: Modifier = Modifier, name: Int, selectedItem: String, onItemSelected: (String) -> Unit) {
+fun DropMenu(modifier: Modifier = Modifier, selectedItem: String, onItemSelected: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val items = listOf("Быт", "Учеба", "Работа")
-    val sortedItems = items.sortedBy { it.toString() }
+    val sortedItems = items.sortedBy { it }
 
     Box {
         OutlinedButton(
@@ -179,7 +168,7 @@ fun DropMenu(modifier: Modifier = Modifier, name: Int, selectedItem: String, onI
                 .size(53.dp)
                 .align(alignment = Alignment.CenterStart),
             shape = RoundedCornerShape(5.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0x0))
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0x00000000))
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -226,6 +215,65 @@ fun DropMenu(modifier: Modifier = Modifier, name: Int, selectedItem: String, onI
 
 fun generateId(): Int {
     return (Math.random() * 10000).toInt()
+}
+
+
+@Composable
+fun AddCategory(
+
+){
+    val openDialog = remember { mutableStateOf(false) }
+    var newCategory by remember { mutableStateOf("") }
+    Button(
+        onClick = { openDialog.value = true }
+    ) {
+        Text("Добавить категорию")
+    }
+    Dialog(onDismissRequest = { openDialog.value = false }) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(375.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = "Новая категория",
+                    modifier = Modifier.padding(16.dp),
+                )
+                EditField(modifier = Modifier
+                    .padding(bottom = 32.dp)
+                    .fillMaxWidth(),
+                    value = newCategory,
+                    name = R.string.category_name,
+                    onValueChange = { newCategory = it })
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                ) {
+                    TextButton(
+                        onClick = { openDialog.value = false },
+                        modifier = Modifier.padding(8.dp),
+                    ) {
+                        Text("Отмена")
+                    }
+                    TextButton(
+                        onClick = { openDialog.value = false },
+                        modifier = Modifier.padding(8.dp),
+                    ) {
+                        Text("Создать")
+                    }
+                }
+            }
+        }
+    }
 }
 
 
