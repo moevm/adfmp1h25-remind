@@ -25,6 +25,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
@@ -147,7 +148,6 @@ fun EditField(modifier: Modifier = Modifier, name: Int, value: String, onValueCh
         onValueChange = onValueChange,
         singleLine = true,
         textStyle = TextStyle.Default.copy(fontSize = 20.sp),
-        label = { Text(stringResource(name)) },
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         modifier = modifier
     )
@@ -233,7 +233,7 @@ fun AddCategory(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(375.dp)
+                .height(250.dp)
                 .padding(16.dp),
             shape = RoundedCornerShape(16.dp),
         ) {
@@ -248,25 +248,25 @@ fun AddCategory(
                     modifier = Modifier.padding(16.dp),
                 )
                 EditField(modifier = Modifier
-                    .padding(bottom = 32.dp)
-                    .fillMaxWidth(),
+                    .padding(bottom = 15.dp)
+                    .width(250.dp),
                     value = newCategory,
                     name = R.string.category_name,
                     onValueChange = { newCategory = it })
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     TextButton(
                         onClick = { openDialog.value = false },
-                        modifier = Modifier.padding(8.dp),
+                        modifier = Modifier.padding(15.dp),
                     ) {
                         Text("Отмена")
                     }
                     TextButton(
                         onClick = { openDialog.value = false },
-                        modifier = Modifier.padding(8.dp),
+                        modifier = Modifier.padding(15.dp),
                     ) {
                         Text("Создать")
                     }
@@ -277,9 +277,9 @@ fun AddCategory(
 }
 
 
-//
-//@Preview(showBackground = true)
-//@Composable
-//fun Preview() {
-//    NewTaskLayout()
-//}
+
+@Preview(showBackground = true)
+@Composable
+fun Preview() {
+    AddCategory()
+}
