@@ -43,6 +43,31 @@ class FileManager {
         }
     }
 
+    fun saveCategoriesToFile(context: Context, categories: List<String>) {
+        val json = gson.toJson(categories)
+
+        try {
+            val fos = context.openFileOutput("categories.json", Context.MODE_PRIVATE)
+            val writer = OutputStreamWriter(fos)
+            writer.use { it.write(json) }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    fun loadCategoriesFromFile(context: Context): List<String> {
+        return try {
+            context.openFileInput("categories.json").use { stream ->
+                val reader = stream.bufferedReader()
+                val jsonString = reader.lineSequence().joinToString("\n")
+                if (jsonString.isBlank()) listOf("Быт", "Работа", "Учеба")
+                else gson.fromJson(jsonString, object : TypeToken<List<String>>() {}.type)
+            }
+        } catch (e: Exception) {
+            listOf("Быт", "Работа", "Учеба")
+        }
+    }
+
 
 //    fun saveImageToFile(context: Context, bitmap: Bitmap, fileName: String) {
 //        try {
