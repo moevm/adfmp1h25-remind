@@ -158,7 +158,7 @@ fun EditField(modifier: Modifier = Modifier, name: Int, value: String, onValueCh
 fun DropMenu(modifier: Modifier = Modifier, selectedItem: String, onItemSelected: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val items = listOf("Быт", "Учеба", "Работа")
-    val sortedItems = items.sortedBy { it }
+    val sortedItems = items.sortedBy { it.toString() }
 
     Box {
         OutlinedButton(
