@@ -222,7 +222,7 @@ fun generateId(): Int {
 fun AddCategory(
 
 ){
-    val openDialog = remember { mutableStateOf(false) }
+    var openDialog = remember { mutableStateOf(false) }
     var newCategory by remember { mutableStateOf("") }
     Button(
         onClick = { openDialog.value = true }
