@@ -1,5 +1,6 @@
 package com.example.remind.ui.pages
 
+import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -36,9 +37,11 @@ import com.example.remind.ui.models.Task
 @Composable
 fun NewTaskLayout(navController: NavController) {
     var taskName by remember { mutableStateOf("") }
-    var category by remember { mutableStateOf("Быт") }
+
     val fileManager = FileManager()
     val context = LocalContext.current
+    val existingCategories = fileManager.loadCategoriesFromFile(context).toMutableList()
+    var category by remember { mutableStateOf(existingCategories[0]) }
 
     Column(
         modifier = Modifier
@@ -64,7 +67,9 @@ fun NewTaskLayout(navController: NavController) {
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Назад",
                     tint = Color.Black,
-                    modifier = Modifier.padding(end = 15.dp).size(25.dp)
+                    modifier = Modifier
+                        .padding(end = 15.dp)
+                        .size(25.dp)
                 )
                 Text("Новое дело",
                     fontSize = 23.sp,
@@ -102,11 +107,12 @@ fun NewTaskLayout(navController: NavController) {
                 .padding(bottom = 32.dp)
                 .fillMaxWidth(),
             selectedItem = category,
-            onItemSelected = { category = it }
+            onItemSelected = { category = it },
+            items = existingCategories
         )
 
         Spacer(modifier = Modifier.height(150.dp))
-        AddCategory()
+        AddCategory(context=context, fileManager=fileManager, onCreateCategory = {data-> category = data})
         Button(
             onClick = {
                 val newTask = Task(
@@ -155,9 +161,9 @@ fun EditField(modifier: Modifier = Modifier, name: Int, value: String, onValueCh
 
 
 @Composable
-fun DropMenu(modifier: Modifier = Modifier, selectedItem: String, onItemSelected: (String) -> Unit) {
+fun DropMenu(modifier: Modifier = Modifier, items: List<String>, selectedItem: String, onItemSelected: (String) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
-    val items = listOf("Быт", "Учеба", "Работа")
+//    val items = listOf("Быт", "Учеба", "Работа")
     val sortedItems = items.sortedBy { it.toString() }
 
     Box {
@@ -220,7 +226,9 @@ fun generateId(): Int {
 
 @Composable
 fun AddCategory(
-
+    context: Context,
+    fileManager: FileManager,
+    onCreateCategory: (String) -> Unit
 ){
     val openDialog = remember { mutableStateOf(false) }
     var newCategory by remember { mutableStateOf("") }
@@ -266,7 +274,14 @@ fun AddCategory(
                             Text("Отмена")
                         }
                         TextButton(
-                            onClick = { openDialog.value = false },
+                            onClick = {
+                                openDialog.value = false
+                                val existingCategories = fileManager.loadCategoriesFromFile(context).toMutableList()
+                                existingCategories.add(newCategory)
+                                fileManager.saveCategoriesToFile(context = context, categories = existingCategories)
+                                onCreateCategory(newCategory)
+                                newCategory = ""
+                                },
                             modifier = Modifier.padding(15.dp),
                         ) {
                             Text("Создать")
@@ -280,8 +295,8 @@ fun AddCategory(
 
 
 
-@Preview(showBackground = true)
-@Composable
-fun Preview() {
-    AddCategory()
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun Preview() {
+//    AddCategory()
+//}
