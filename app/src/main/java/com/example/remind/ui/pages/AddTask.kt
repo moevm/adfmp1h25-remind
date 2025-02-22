@@ -222,53 +222,55 @@ fun generateId(): Int {
 fun AddCategory(
 
 ){
-    var openDialog = remember { mutableStateOf(false) }
+    val openDialog = remember { mutableStateOf(false) }
     var newCategory by remember { mutableStateOf("") }
     Button(
         onClick = { openDialog.value = true }
     ) {
         Text("Добавить категорию")
     }
-    Dialog(onDismissRequest = { openDialog.value = false }) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp)
-                .padding(16.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Column(
+    if(openDialog.value){
+        Dialog(onDismissRequest = { openDialog.value = false }) {
+            Card(
                 modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
             ) {
-                Text(
-                    text = "Новая категория",
-                    modifier = Modifier.padding(16.dp),
-                )
-                EditField(modifier = Modifier
-                    .padding(bottom = 15.dp)
-                    .width(250.dp),
-                    value = newCategory,
-                    name = R.string.category_name,
-                    onValueChange = { newCategory = it })
-                Row(
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    TextButton(
-                        onClick = { openDialog.value = false },
-                        modifier = Modifier.padding(15.dp),
+                    Text(
+                        text = "Новая категория",
+                        modifier = Modifier.padding(16.dp),
+                    )
+                    EditField(modifier = Modifier
+                        .padding(bottom = 15.dp)
+                        .width(250.dp),
+                        value = newCategory,
+                        name = R.string.category_name,
+                        onValueChange = { newCategory = it })
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("Отмена")
-                    }
-                    TextButton(
-                        onClick = { openDialog.value = false },
-                        modifier = Modifier.padding(15.dp),
-                    ) {
-                        Text("Создать")
+                        TextButton(
+                            onClick = { openDialog.value = false },
+                            modifier = Modifier.padding(15.dp),
+                        ) {
+                            Text("Отмена")
+                        }
+                        TextButton(
+                            onClick = { openDialog.value = false },
+                            modifier = Modifier.padding(15.dp),
+                        ) {
+                            Text("Создать")
+                        }
                     }
                 }
             }
