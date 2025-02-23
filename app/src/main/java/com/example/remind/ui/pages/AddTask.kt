@@ -1,6 +1,9 @@
 package com.example.remind.ui.pages
 
 import android.content.Context
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -21,6 +24,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
@@ -29,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
@@ -165,7 +171,7 @@ fun EditField(modifier: Modifier = Modifier, name: Int, value: String, onValueCh
 
 @Composable
 fun DropMenu(modifier: Modifier = Modifier, items: List<String>, selectedItem: String, onItemSelected: (String) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(true) }
 //    val items = listOf("Быт", "Учеба", "Работа")
     val sortedItems = items.sortedBy { it.toString() }
 
@@ -187,12 +193,12 @@ fun DropMenu(modifier: Modifier = Modifier, items: List<String>, selectedItem: S
                 Text(
                     textAlign = TextAlign.Start,
                     text = selectedItem,
-                    fontSize = 18.sp,
+                    style = TextStyle.Default.copy(fontSize = 18.sp),
                     color = Color(0xFF000000),
-                    style = TextStyle.Default.copy(fontSize = 20.sp)
+
                 )
                 Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
+                    imageVector = if (expanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = "Развернуть список",
                     tint = Color.Black,
                     modifier = Modifier.size(30.dp)
@@ -202,20 +208,40 @@ fun DropMenu(modifier: Modifier = Modifier, items: List<String>, selectedItem: S
 
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
+            modifier = Modifier
+                .width(347.dp)
+                .background(Color(0xFFF8FAFB)),
+            shadowElevation = 0.dp,
+            border = BorderStroke(DividerDefaults.Thickness,  DividerDefaults.color)
         ) {
-            sortedItems.forEach { item ->
+            DropdownMenuItem(
+                text = {
+                    Text(
+                        modifier = Modifier.padding(start = 11.dp),
+                        text = sortedItems[0],
+                        style = TextStyle.Default.copy(fontSize = 18.sp)
+                    )
+                },
+                onClick = {
+                    onItemSelected(sortedItems[0])
+                    expanded = false
+                },
+            )
+            sortedItems.slice(1 until sortedItems.size).forEach { item ->
+                HorizontalDivider()
                 DropdownMenuItem(
                     text = {
                         Text(
+                            modifier = Modifier.padding(start = 11.dp),
                             text = item,
-                            style = TextStyle.Default.copy(fontSize = 20.sp)
+                            style = TextStyle.Default.copy(fontSize = 18.sp)
                         )
                     },
                     onClick = {
                         onItemSelected(item)
                         expanded = false
-                    }
+                    },
                 )
             }
         }
