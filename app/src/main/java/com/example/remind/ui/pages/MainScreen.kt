@@ -12,6 +12,9 @@ import androidx.navigation.NavController
 import com.example.remind.data.FileManager
 import com.example.remind.ui.components.TabBar
 import com.example.remind.ui.models.Task
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun MainScreen(navController: NavController) {
@@ -53,12 +56,14 @@ fun MainScreen(navController: NavController) {
         }
     }
 
+
     if (showCamera) {
         CameraScreen(
             onImageCaptured = { path ->
+                val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
                 tasks = tasks.map { task ->
                     if (task.id == selectedTaskId) {
-                        task.copy(image = path)
+                        task.copy(image = path, imageDate = currentTime)
                     } else task
                 }
                 FileManager().saveTasksToFile(context, tasks)
@@ -67,5 +72,20 @@ fun MainScreen(navController: NavController) {
             onClose = { showCamera = false }
         )
     }
+
+//    if (showCamera) {
+//        CameraScreen(
+//            onImageCaptured = { path ->
+//                tasks = tasks.map { task ->
+//                    if (task.id == selectedTaskId) {
+//                        task.copy(image = path)
+//                    } else task
+//                }
+//                FileManager().saveTasksToFile(context, tasks)
+//                showCamera = false
+//            },
+//            onClose = { showCamera = false }
+//        )
+//    }
 }
 
