@@ -12,6 +12,10 @@ import com.example.remind.R
 import com.example.remind.ui.components.TaskCategory
 import com.example.remind.ui.models.Task
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.rememberNavController
 import java.time.LocalDateTime
 
 @Composable
@@ -49,10 +53,11 @@ fun TaskListScreen(
                     )
                 }
                 IconButton(onClick = { /* Сортировка */ }) {
-                    Image(
-                        painter = painterResource(id = R.drawable.sort),
-                        contentDescription = "Сортировка"
-                    )
+                    iconSortTime()
+//                    Image(
+//                        painter = painterResource(id = R.drawable.sort),
+//                        contentDescription = "Сортировка"
+//                    )
                 }
             }
         }
@@ -92,4 +97,32 @@ fun TaskListScreen(
     LaunchedEffect(tasksState) {
         onUpdateTasks(tasksState.toList())
     }
+}
+
+@Composable
+fun iconSortTime(){
+    Box(
+        modifier = Modifier.size(width = 30.dp, height = 29.dp)
+    ){
+        Image(
+            modifier = Modifier.size(28.dp),
+            painter = painterResource(id = R.drawable.sort2),
+            contentDescription = "Сортировка"
+        )
+
+        Image(
+            modifier = Modifier
+                .padding(start=18.dp, top=17.dp)
+                .size(12.dp),
+            painter = painterResource(id = R.drawable.clock),
+            contentDescription = "Время"
+        )
+    }
+}
+
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewTaskList() {
+    iconSortTime()
 }
