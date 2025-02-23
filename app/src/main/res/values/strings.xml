@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">remind</string>
+    <string name="app_name">Спокоен</string>
     <string name="task_name">Название</string>
     <string name="category_name">Категория</string>
     <string name="button_add_task">ДОБАВИТЬ</string>
