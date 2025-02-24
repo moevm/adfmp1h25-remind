@@ -60,7 +60,7 @@ fun MainScreen(navController: NavController) {
     if (showCamera) {
         CameraScreen(
             onImageCaptured = { path ->
-                val currentTime = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault()).format(Date())
+                val currentTime = getCurrentTime()
                 tasks = tasks.map { task ->
                     if (task.id == selectedTaskId) {
                         task.copy(image = path, imageDate = currentTime)
@@ -89,3 +89,6 @@ fun MainScreen(navController: NavController) {
 //    }
 }
 
+private fun getCurrentTime(): String {
+    return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
+}

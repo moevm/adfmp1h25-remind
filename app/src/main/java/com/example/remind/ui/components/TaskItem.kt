@@ -1,6 +1,7 @@
 package com.example.remind.ui.components
 
 import android.graphics.Bitmap
+import android.graphics.Matrix
 import android.graphics.BitmapFactory
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -86,7 +87,9 @@ fun TaskItem(
                         .clickable {
                             val updatedTask = task.copy(
                                 isCompleted = !task.isCompleted,
-                                completedAt = if (!task.isCompleted) getCurrentTime() else null
+                                completedAt = if (!task.isCompleted) getCurrentTime() else null,
+                                image = if (task.isCompleted) null else task.image,
+                                imageDate = if (task.isCompleted) null else task.imageDate
                             )
                             onTaskUpdated(updatedTask)
                         }
@@ -122,17 +125,20 @@ fun TaskItem(
                     onClick = { showPhotoPicker = true },
                 ) {
                     Icon(
-                        imageVector = Icons.Default.Favorite,
+                        modifier = Modifier.size(32.dp),
+                        painter = painterResource(id = R.drawable.photo),
                         contentDescription = "Добавить фото",
-                        tint = Color.DarkGray
                     )
                 }
             }
 
             task.image?.let {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                        .height(60.dp),
+                    verticalAlignment = Alignment.Bottom
                 ) {
                     ImagePreview(path = it)
                     Spacer(modifier = Modifier.width(8.dp))
@@ -140,7 +146,8 @@ fun TaskItem(
                         Text(
                             text = formatTime(date),
                             fontSize = 12.sp,
-                            color = Color.Gray
+                            color = Color.Gray,
+                            modifier = Modifier.padding(bottom = 4.dp)
                         )
                     }
                 }
@@ -167,22 +174,29 @@ private fun ImagePreview(path: String) {
     }
 
     bitmap?.let {
+        val rotatedBitmap = rotateBitmap(it, 90f)
         Image(
-            bitmap = Bitmap.createScaledBitmap(it, 60, 60, true).asImageBitmap(),
+            bitmap = Bitmap.createScaledBitmap(rotatedBitmap, 60, 60, true).asImageBitmap(),
             contentDescription = "Превью фото",
             modifier = Modifier.size(60.dp)
         )
     }
 }
 
+private fun rotateBitmap(source: Bitmap, degrees: Float): Bitmap {
+    val matrix = Matrix()
+    matrix.postRotate(degrees)
+    return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
+}
+
 private fun getCurrentTime(): String {
-    return SimpleDateFormat("dd.MM HH:mm", Locale.getDefault()).format(Date())
+    return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
 }
 
 private fun formatTime(timestamp: String): String {
     return try {
         val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-        val outputFormat = SimpleDateFormat("dd.MM HH:mm", Locale.getDefault())
+        val outputFormat = SimpleDateFormat("dd.MM HH:mm:ss", Locale.getDefault())
         outputFormat.format(inputFormat.parse(timestamp) ?: Date())
     } catch (e: Exception) {
         timestamp.replace("T", " ")

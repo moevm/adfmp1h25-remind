@@ -67,7 +67,14 @@ fun TaskListScreen(
 
         TextButton(
             onClick = {
-                tasksState.replaceAll { it.copy(isCompleted = false, completedAt = null) }
+                tasksState.replaceAll {
+                    it.copy(
+                        isCompleted = false,
+                        completedAt = null,
+                        imageDate = null,
+                        image = null
+                    )
+                }
                 onUpdateTasks(tasksState)
             },
             enabled = hasCompletedTasks
@@ -85,7 +92,8 @@ fun TaskListScreen(
                             val index = tasksState.indexOfFirst { it.id == updatedTask.id }
                             if (index != -1) {
                                 tasksState[index] = updatedTask.apply {
-                                    completedAt = if (isCompleted) LocalDateTime.now().toString() else null
+                                    completedAt =
+                                        if (isCompleted) LocalDateTime.now().toString() else null
                                 }
                                 onUpdateTasks(tasksState.toList())
                             }
@@ -104,10 +112,10 @@ fun TaskListScreen(
 }
 
 @Composable
-fun iconSortTime(){
+fun iconSortTime() {
     Box(
         modifier = Modifier.size(width = 30.dp, height = 29.dp)
-    ){
+    ) {
         Image(
             modifier = Modifier.size(28.dp),
             painter = painterResource(id = R.drawable.sort2),
@@ -116,7 +124,7 @@ fun iconSortTime(){
 
         Image(
             modifier = Modifier
-                .padding(start=18.dp, top=17.dp)
+                .padding(start = 18.dp, top = 17.dp)
                 .size(12.dp),
             painter = painterResource(id = R.drawable.clock),
             contentDescription = "Время"
