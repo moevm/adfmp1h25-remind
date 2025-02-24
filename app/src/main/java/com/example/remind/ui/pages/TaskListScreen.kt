@@ -16,7 +16,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import java.time.Duration
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun TaskListScreen(
@@ -24,12 +27,29 @@ fun TaskListScreen(
     onUpdateTasks: (List<Task>) -> Unit,
     onOpenCamera: (Int) -> Unit
 ) {
+    var sortDesk by remember { mutableStateOf(false) }
+
     val tasksState = remember(tasks) { tasks.toMutableStateList() }
     val hasCompletedTasks = tasksState.any { it.isCompleted }
     val groupedTasks = tasksState.groupBy { it.category }
     fun deleteTask(task: Task) {
         tasksState.remove(task)
         onUpdateTasks(tasksState.toList()) // Обновить список задач
+    }
+    fun sortTask(desc: Int) {
+        tasksState.sortWith(Comparator{a: Task, b: Task->
+            if(a.completedAt.isNullOrBlank() || b.completedAt.isNullOrBlank()) {
+                return@Comparator 1
+            }
+            if(a.completedAt!! < b.completedAt!!){
+                return@Comparator 1*desc
+            }
+            if(a.completedAt!! > b.completedAt!!){
+                return@Comparator -1*desc
+            }
+            return@Comparator 0
+        })
+
     }
     Column(
         modifier = Modifier
@@ -55,7 +75,7 @@ fun TaskListScreen(
                         contentDescription = "Фильтр"
                     )
                 }
-                IconButton(onClick = { /* Сортировка */ }) {
+                IconButton(onClick = { sortTask(-1) }) {
                     iconSortTime()
 //                    Image(
 //                        painter = painterResource(id = R.drawable.sort),
