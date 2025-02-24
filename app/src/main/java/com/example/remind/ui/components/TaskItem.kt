@@ -58,10 +58,10 @@ fun TaskItem(
                 contentAlignment = Alignment.CenterEnd
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.gallery),
+                    painter = painterResource(id = R.drawable.delete),
                     contentDescription = "Удалить",
                     tint = Color.White,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(32.dp)
                 )
             }
         },
