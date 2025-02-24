@@ -63,7 +63,7 @@ fun MainScreen(navController: NavController) {
                 val currentTime = getCurrentTime()
                 tasks = tasks.map { task ->
                     if (task.id == selectedTaskId) {
-                        task.copy(image = path, imageDate = currentTime)
+                        task.copy(image = path, imageDate = currentTime, completedAt=currentTime, isCompleted = true)
                     } else task
                 }
                 FileManager().saveTasksToFile(context, tasks)

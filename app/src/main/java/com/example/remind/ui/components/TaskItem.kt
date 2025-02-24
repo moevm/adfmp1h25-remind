@@ -121,13 +121,19 @@ fun TaskItem(
                     }
                 }
 
-                IconButton(
-                    onClick = { showPhotoPicker = true },
+                Box(
+                    modifier = Modifier
+                        .size(width = 50.dp, height = 40.dp)
+                        .clip(RoundedCornerShape(50))
+                        .background(if (task.isCompleted) Color(0xFFB2E6AC) else Color(0xFFE6CCCC))
+                        .clickable { showPhotoPicker = true },
+                    contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        modifier = Modifier.size(32.dp),
+                        modifier = Modifier.size(24.dp),
                         painter = painterResource(id = R.drawable.photo),
                         contentDescription = "Добавить фото",
+                        tint = Color.White
                     )
                 }
             }
