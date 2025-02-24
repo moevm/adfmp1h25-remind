@@ -68,23 +68,4 @@ class FileManager {
         }
     }
 
-
-//    fun saveImageToFile(context: Context, bitmap: Bitmap, fileName: String) {
-//        try {
-//            val fos = context.openFileOutput(fileName, Context.MODE_PRIVATE)
-//            fos.use { bitmap.compress(Bitmap.CompressFormat.PNG, 100, it) }
-//        } catch (e: IOException) {
-//            e.printStackTrace()
-//        }
-//    }
-//
-//    fun loadImageFromFile(context: Context, fileName: String): Bitmap? {
-//        try {
-//            val fis = context.openFileInput(fileName)
-//            fis.use { return BitmapFactory.decodeStream(it) }
-//        } catch (e: IOException) {
-//            e.printStackTrace()
-//        }
-//        return null
-//    }
 }

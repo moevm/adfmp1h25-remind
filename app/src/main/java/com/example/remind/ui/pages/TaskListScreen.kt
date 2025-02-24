@@ -27,7 +27,10 @@ fun TaskListScreen(
     val tasksState = remember(tasks) { tasks.toMutableStateList() }
     val hasCompletedTasks = tasksState.any { it.isCompleted }
     val groupedTasks = tasksState.groupBy { it.category }
-
+    fun deleteTask(task: Task) {
+        tasksState.remove(task)
+        onUpdateTasks(tasksState.toList()) // Обновить список задач
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -87,6 +90,7 @@ fun TaskListScreen(
                                 onUpdateTasks(tasksState.toList())
                             }
                         },
+                        onTaskDeleted = { task -> deleteTask(task) },
                         onOpenCamera = { taskId -> onOpenCamera(taskId) }
                     )
                 }

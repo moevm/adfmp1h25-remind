@@ -18,6 +18,7 @@ fun TaskCategory(
     category: String,
     tasks: List<Task>,
     onTaskUpdated: (Task) -> Unit,
+    onTaskDeleted: (Task) -> Unit,
     onOpenCamera: (Int) -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(true) }
@@ -57,7 +58,8 @@ fun TaskCategory(
                                 onTaskUpdated(updatedTask)
                             }
                         },
-                        onOpenCamera = { onOpenCamera(task.id) }
+                        onOpenCamera = { onOpenCamera(task.id) },
+                        onTaskDeleted = { onTaskDeleted(task) },
                     )
                 }
             }
