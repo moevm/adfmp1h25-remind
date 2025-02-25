@@ -48,8 +48,11 @@ fun TaskListScreen(
     }
     fun sortTask(desc: Int) {
         tasksState.sortWith(Comparator{a: Task, b: Task->
-            if(a.completedAt.isNullOrBlank() || b.completedAt.isNullOrBlank()) {
-                return@Comparator 1
+            if(a.completedAt.isNullOrBlank()) {
+                return@Comparator 1             //опускаем неотмеченные дела вниз
+            }
+            if( b.completedAt.isNullOrBlank()){
+                return@Comparator -1           //опускаем неотмеченные дела вниз
             }
             if(a.completedAt!! < b.completedAt!!){
                 return@Comparator 1*desc
@@ -173,11 +176,10 @@ fun askBottomSheet(
     val (selectedOption, onOptionSelected) = remember { mutableStateOf("") }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
     IconButton(onClick = { openBottomSheet = !openBottomSheet }) {
-        iconSortTime()
-//                    Image(
-//                        painter = painterResource(id = R.drawable.sort),
-//                        contentDescription = "Сортировка"
-//                    )
+        Image(
+            painter = painterResource(id = R.drawable.sort),
+            contentDescription = "Сортировка"
+        )
     }
     if(openBottomSheet) {
         ModalBottomSheet(
