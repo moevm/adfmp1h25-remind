@@ -171,7 +171,7 @@ fun EditField(modifier: Modifier = Modifier, name: Int, value: String, onValueCh
 
 @Composable
 fun DropMenu(modifier: Modifier = Modifier, items: List<String>, selectedItem: String, onItemSelected: (String) -> Unit) {
-    var expanded by remember { mutableStateOf(true) }
+    var expanded by remember { mutableStateOf(false) }
 //    val items = listOf("Быт", "Учеба", "Работа")
     val sortedItems = items.sortedBy { it.toString() }
 
