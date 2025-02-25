@@ -3,8 +3,12 @@ package com.example.remind.ui.pages
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -13,9 +17,15 @@ import com.example.remind.ui.components.TaskCategory
 import com.example.remind.ui.models.Task
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -49,8 +59,12 @@ fun TaskListScreen(
             }
             return@Comparator 0
         })
-
     }
+    fun unsortTask(){
+        tasksState.clear()
+        tasksState.addAll(tasks)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -75,13 +89,8 @@ fun TaskListScreen(
                         contentDescription = "Фильтр"
                     )
                 }
-                IconButton(onClick = { sortTask(-1) }) {
-                    iconSortTime()
-//                    Image(
-//                        painter = painterResource(id = R.drawable.sort),
-//                        contentDescription = "Сортировка"
-//                    )
-                }
+                askBottomSheet(radioOptions = listOf("Сначала новые отметки", "Сначала старые отметки", "Сбросить сортировку"),
+                    functionOptions = listOf({sortTask(1)}, {sortTask(-1)}, {unsortTask()}))
             }
         }
 
@@ -149,6 +158,95 @@ fun iconSortTime() {
             painter = painterResource(id = R.drawable.clock),
             contentDescription = "Время"
         )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun askBottomSheet(
+    radioOptions: List<String>,
+    functionOptions: List<()->Unit>
+){
+    var openBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var skipPartiallyExpanded by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val (selectedOption, onOptionSelected) = remember { mutableStateOf("") }
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
+    IconButton(onClick = { openBottomSheet = !openBottomSheet }) {
+        iconSortTime()
+//                    Image(
+//                        painter = painterResource(id = R.drawable.sort),
+//                        contentDescription = "Сортировка"
+//                    )
+    }
+    if(openBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { openBottomSheet = false },
+            shape = RoundedCornerShape(10.dp),
+        ) {
+            Column(Modifier.selectableGroup()) {
+                Row(
+                    Modifier
+                    .fillMaxWidth()
+                    .padding(top = 0.dp, bottom = 16.dp, start = 150.dp),
+
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically){
+                    Text(
+                        text = "Сортировка",
+                        fontSize = 23.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Medium
+                    )
+                    TextButton(
+                        modifier = Modifier.padding(end = 15.dp),
+                        onClick = {scope
+                            .launch{ bottomSheetState.hide() }
+                            .invokeOnCompletion {
+                                if (!bottomSheetState.isVisible) {
+                                    openBottomSheet = false
+                                }
+                            }}
+                    ) {
+                        Text("Закрыть",
+                            fontSize = 15.sp,
+                            color = Color.Gray
+                            )
+                    }
+                }
+                HorizontalDivider()
+                radioOptions.forEachIndexed{id, text ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .selectable(
+                                selected = (text == selectedOption),
+                                onClick = {
+                                    onOptionSelected(text)
+                                    openBottomSheet = false
+                                    functionOptions[id]()
+                                          },
+                                role = Role.RadioButton
+                            )
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ){
+                        Text(
+                            text = text,
+                            style = TextStyle.Default.copy(fontSize = 18.sp),
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                        RadioButton(
+                            selected = (text == selectedOption),
+                            onClick = null
+
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
