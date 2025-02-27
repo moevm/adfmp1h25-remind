@@ -51,6 +51,7 @@ fun NewTaskLayout(navController: NavController) {
     val context = LocalContext.current
     val existingCategories = fileManager.loadCategoriesFromFile(context).toMutableList()
     var category by remember { mutableStateOf(existingCategories[0]) }
+    var highlight by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -101,7 +102,12 @@ fun NewTaskLayout(navController: NavController) {
                 .fillMaxWidth(),
             name = R.string.task_name,
             value = taskName,
-            onValueChange = { taskName = it }
+            onValueChange = {
+                taskName = it
+                highlight = false
+                },
+            highError = highlight,
+            validationHasErrors = taskName.isEmpty()
         )
 
         Text(
@@ -124,19 +130,24 @@ fun NewTaskLayout(navController: NavController) {
         Spacer(modifier = Modifier.height(50.dp))
         Button(
             onClick = {
-                val newTask = Task(
-                    id = generateId(),
-                    title = taskName,
-                    isCompleted = false,
-                    completedAt = null,
-                    category = category,
-                    image = null,
-                    imageDate = null
-                )
-                val existingTasks = fileManager.loadTasksFromFile(context).toMutableList()
-                existingTasks.add(newTask)
-                fileManager.saveTasksToFile(context = context, tasks = existingTasks)
-                navController.navigate("main")
+                if(taskName.isEmpty()){
+                    highlight = true
+                }
+                else{
+                    val newTask = Task(
+                        id = generateId(),
+                        title = taskName,
+                        isCompleted = false,
+                        completedAt = null,
+                        category = category,
+                        image = null,
+                        imageDate = null
+                    )
+                    val existingTasks = fileManager.loadTasksFromFile(context).toMutableList()
+                    existingTasks.add(newTask)
+                    fileManager.saveTasksToFile(context = context, tasks = existingTasks)
+                    navController.navigate("main")
+                }
             },
             modifier = Modifier
                 .fillMaxSize()
@@ -157,14 +168,20 @@ fun NewTaskLayout(navController: NavController) {
 
 
 @Composable
-fun EditField(modifier: Modifier = Modifier, name: Int, value: String, onValueChange: (String) -> Unit) {
+fun EditField(modifier: Modifier = Modifier, name: Int, value: String, onValueChange: (String) -> Unit, validationHasErrors: Boolean, highError: Boolean) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
         singleLine = true,
         textStyle = TextStyle.Default.copy(fontSize = 18.sp),
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-        modifier = modifier
+        modifier = modifier,
+        isError = highError,
+        supportingText = {
+            if(validationHasErrors){
+                Text("Поле не может быть пустым")
+            }
+        }
     )
 }
 
@@ -261,6 +278,7 @@ fun AddCategory(
 ){
     val openDialog = remember { mutableStateOf(false) }
     var newCategory by remember { mutableStateOf("") }
+    var highlightCategory by remember { mutableStateOf(false) }
     TextButton(
         onClick = { openDialog.value = true },
         contentPadding = PaddingValues(0.dp),
@@ -295,7 +313,7 @@ fun AddCategory(
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(180.dp)
+                    .height(250.dp)
                     .padding(0.dp),
                 shape = RectangleShape,
             ) {
@@ -315,7 +333,13 @@ fun AddCategory(
                         .width(280.dp),
                         value = newCategory,
                         name = R.string.category_name,
-                        onValueChange = { newCategory = it })
+                        onValueChange = {
+                            newCategory = it
+                            highlightCategory = false
+                            },
+                        validationHasErrors = newCategory.isEmpty(),
+                        highError = highlightCategory
+                    )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth(),
@@ -332,12 +356,17 @@ fun AddCategory(
                         }
                         TextButton(
                             onClick = {
-                                openDialog.value = false
-                                val existingCategories = fileManager.loadCategoriesFromFile(context).toMutableList()
-                                existingCategories.add(newCategory)
-                                fileManager.saveCategoriesToFile(context = context, categories = existingCategories)
-                                onCreateCategory(newCategory)
-                                newCategory = ""
+                                if(newCategory.isEmpty()){
+                                    highlightCategory = true
+                                }
+                                else{
+                                    openDialog.value = false
+                                    val existingCategories = fileManager.loadCategoriesFromFile(context).toMutableList()
+                                    existingCategories.add(newCategory)
+                                    fileManager.saveCategoriesToFile(context = context, categories = existingCategories)
+                                    onCreateCategory(newCategory)
+                                    newCategory = ""
+                                    }
                                 },
                             modifier = Modifier.padding(15.dp),
                         ) {
