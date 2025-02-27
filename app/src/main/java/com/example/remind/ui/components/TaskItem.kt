@@ -30,6 +30,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 
 @Composable
 fun TaskItem(
@@ -40,6 +42,7 @@ fun TaskItem(
 ) {
     val dismissState = rememberSwipeToDismissBoxState()
     var showPhotoPicker by remember { mutableStateOf(false) }
+    var showFullScreenImage by remember { mutableStateOf(false) }
 
     LaunchedEffect(dismissState.currentValue) {
         if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
@@ -72,7 +75,11 @@ fun TaskItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(if (task.isCompleted) Color(0xFFDFFFD6) else Color(0xFFFFE5E5))
-                .border(1.dp, if (task.isCompleted) Color(0xFFD4F0D2) else Color(0xFFF0DEDE), RoundedCornerShape(4.dp))
+                .border(
+                    1.dp,
+                    if (task.isCompleted) Color(0xFFD4F0D2) else Color(0xFFF0DEDE),
+                    RoundedCornerShape(4.dp)
+                )
                 .padding(horizontal = 12.dp, vertical = 8.dp)
         ) {
             Row(
@@ -99,7 +106,9 @@ fun TaskItem(
                             painter = painterResource(id = R.drawable.checkmark),
                             contentDescription = "Чекбокс",
                             tint = Color.White,
-                            modifier = Modifier.size(20.dp).align(Alignment.Center)
+                            modifier = Modifier
+                                .size(20.dp)
+                                .align(Alignment.Center)
                         )
                     }
                 }
@@ -146,7 +155,10 @@ fun TaskItem(
                         .height(60.dp),
                     verticalAlignment = Alignment.Bottom
                 ) {
-                    ImagePreview(path = it)
+                    ImagePreview(
+                        path = it,
+                        onClick = { showFullScreenImage = true }
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
                     task.imageDate?.let { date ->
                         Text(
@@ -171,10 +183,51 @@ fun TaskItem(
             }
         )
     }
+
+    if (showFullScreenImage && task.image != null) {
+        Dialog(
+            onDismissRequest = { showFullScreenImage = false },
+            properties = DialogProperties(usePlatformDefaultWidth = false)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black),
+                contentAlignment = Alignment.Center
+            ) {
+                IconButton(
+                    onClick = { showFullScreenImage = false },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
+                        .size(40.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.cross),
+                        contentDescription = "Закрыть",
+                        tint = Color.White,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+
+                val fullScreenBitmap = BitmapFactory.decodeFile(task.image)
+                val rotatedBitmap = rotateBitmap(fullScreenBitmap, 90f)
+                Image(
+                    bitmap = rotatedBitmap.asImageBitmap(),
+                    contentDescription = "Полноэкранное фото",
+                    modifier = Modifier
+                        .fillMaxSize()
+                )
+            }
+        }
+    }
+
+
+
 }
 
 @Composable
-private fun ImagePreview(path: String) {
+private fun ImagePreview(path: String, onClick: () -> Unit) {
     val bitmap by remember(path) {
         mutableStateOf(BitmapFactory.decodeFile(path))
     }
@@ -184,7 +237,9 @@ private fun ImagePreview(path: String) {
         Image(
             bitmap = Bitmap.createScaledBitmap(rotatedBitmap, 60, 60, true).asImageBitmap(),
             contentDescription = "Превью фото",
-            modifier = Modifier.size(60.dp)
+            modifier = Modifier
+                .size(60.dp)
+                .clickable(onClick = onClick)
         )
     }
 }
