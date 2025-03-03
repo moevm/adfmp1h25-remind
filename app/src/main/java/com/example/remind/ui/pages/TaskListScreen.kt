@@ -38,10 +38,12 @@ fun TaskListScreen(
     onOpenCamera: (Int) -> Unit
 ) {
     var sortDesk by remember { mutableStateOf(false) }
-
+    var filter by remember { mutableStateOf<TaskFilter?>(null) }
     val tasksState = remember(tasks) { tasks.toMutableStateList() }
     val hasCompletedTasks = tasksState.any { it.isCompleted }
-    val groupedTasks = tasksState.groupBy { it.category }
+    //val groupedTasks = tasksState.groupBy { it.category }
+    val filteredTasks = applyFilter(tasksState, filter)
+    val groupedTasks = filteredTasks.groupBy { it.category }
     fun deleteTask(task: Task) {
         tasksState.remove(task)
         onUpdateTasks(tasksState.toList()) // Обновить список задач
@@ -68,6 +70,8 @@ fun TaskListScreen(
         tasksState.addAll(tasks)
     }
 
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -86,11 +90,8 @@ fun TaskListScreen(
             )
 
             Row {
-                IconButton(onClick = { /* Фильтрация */ }) {
-                    Image(
-                        painter = painterResource(id = R.drawable.filter),
-                        contentDescription = "Фильтр"
-                    )
+                FilterBottomSheet { selectedFilter ->
+                    filter = selectedFilter
                 }
                 askBottomSheet(radioOptions = listOf("Сначала новые отметки", "Сначала старые отметки", "Сбросить сортировку"),
                     functionOptions = listOf({sortTask(1)}, {sortTask(-1)}, {unsortTask()}))
@@ -140,6 +141,18 @@ fun TaskListScreen(
 
     LaunchedEffect(tasksState) {
         onUpdateTasks(tasksState.toList())
+    }
+}
+
+enum class TaskFilter {
+    WITH_PHOTO, COMPLETED, NOT_COMPLETED
+}
+fun applyFilter(tasks: List<Task>, filter: TaskFilter?): List<Task> {
+    return when (filter) {
+        TaskFilter.WITH_PHOTO -> tasks.filter { it.image != null }
+        TaskFilter.COMPLETED -> tasks.filter { it.isCompleted }
+        TaskFilter.NOT_COMPLETED -> tasks.filter { !it.isCompleted }
+        null -> tasks
     }
 }
 
@@ -252,6 +265,101 @@ fun askBottomSheet(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FilterBottomSheet(
+    onFilterSelected: (TaskFilter?) -> Unit
+) {
+    var openBottomSheet by rememberSaveable { mutableStateOf(false) }
+    var skipPartiallyExpanded by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val (selectedOption, onOptionSelected) = remember { mutableStateOf<TaskFilter?>(null) }
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
+
+    IconButton(onClick = { openBottomSheet = !openBottomSheet }) {
+        Image(
+            painter = painterResource(id = R.drawable.filter),
+            contentDescription = "Фильтрация"
+        )
+    }
+
+    if (openBottomSheet) {
+        ModalBottomSheet(
+            onDismissRequest = { openBottomSheet = false },
+            shape = RoundedCornerShape(10.dp),
+        ) {
+            Column(Modifier.selectableGroup()) {
+                Row(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(top = 0.dp, bottom = 16.dp, start = 150.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Фильтр",
+                        fontSize = 23.sp,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Medium
+                    )
+                    TextButton(
+                        modifier = Modifier.padding(end = 15.dp),
+                        onClick = {
+                            scope
+                                .launch { bottomSheetState.hide() }
+                                .invokeOnCompletion {
+                                    if (!bottomSheetState.isVisible) {
+                                        openBottomSheet = false
+                                    }
+                                }
+                        }
+                    ) {
+                        Text(
+                            "Закрыть",
+                            fontSize = 15.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+                HorizontalDivider()
+                listOf(
+                    "Только с фото" to TaskFilter.WITH_PHOTO,
+                    "Только отмеченные" to TaskFilter.COMPLETED,
+                    "Не отмеченные" to TaskFilter.NOT_COMPLETED,
+                    "Сбросить фильтры" to null
+                ).forEach { (text, filter) ->
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                            .selectable(
+                                selected = (filter == selectedOption),
+                                onClick = {
+                                    onOptionSelected(filter)
+                                    openBottomSheet = false
+                                    onFilterSelected(filter)
+                                },
+                                role = Role.RadioButton
+                            )
+                            .padding(horizontal = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = text,
+                            style = TextStyle.Default.copy(fontSize = 18.sp),
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                        RadioButton(
+                            selected = (filter == selectedOption),
+                            onClick = null
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
 
 @Preview(showBackground = true)
 @Composable
