@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.remind.data.FileManager
+import com.example.remind.ui.pages.getCurrentTime
 
 @Composable
 fun TaskItem(
@@ -236,7 +237,7 @@ fun TaskItem(
                 }
 
                 val fullScreenBitmap = BitmapFactory.decodeFile(task.image)
-                val rotatedBitmap = rotateBitmap(fullScreenBitmap, 90f)
+                val rotatedBitmap = rotateBitmap(fullScreenBitmap, 0f)
                 Image(
                     bitmap = rotatedBitmap.asImageBitmap(),
                     contentDescription = "Полноэкранное фото",
@@ -257,7 +258,7 @@ private fun ImagePreview(path: String, onClick: () -> Unit) {
     }
 
     bitmap?.let {
-        val rotatedBitmap = rotateBitmap(it, 90f)
+        val rotatedBitmap = rotateBitmap(it, 0f)
         Image(
             bitmap = Bitmap.createScaledBitmap(rotatedBitmap, 60, 60, true).asImageBitmap(),
             contentDescription = "Превью фото",
@@ -274,16 +275,18 @@ private fun rotateBitmap(source: Bitmap, degrees: Float): Bitmap {
     return Bitmap.createBitmap(source, 0, 0, source.width, source.height, matrix, true)
 }
 
-private fun getCurrentTime(): String {
-    return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
-}
 
 private fun formatTime(timestamp: String): String {
     return try {
-        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-        val outputFormat = SimpleDateFormat("dd.MM HH:mm:ss", Locale.getDefault())
+        val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).apply {
+            timeZone = TimeZone.getTimeZone("UTC")
+        }
+        val outputFormat = SimpleDateFormat("dd.MM HH:mm:ss", Locale.getDefault()).apply {
+            timeZone = TimeZone.getTimeZone("Europe/Moscow")
+        }
         outputFormat.format(inputFormat.parse(timestamp) ?: Date())
     } catch (e: Exception) {
         timestamp.replace("T", " ")
     }
 }
+
