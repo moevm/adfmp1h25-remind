@@ -1,13 +1,16 @@
 package com.example.remind.ui.pages
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.remind.data.FileManager
 import com.example.remind.ui.components.TabBar
@@ -37,21 +40,38 @@ fun MainScreen(navController: NavController) {
             )
         }
     ) { paddingValues ->
-        Box(modifier = Modifier.padding(paddingValues)) {
-            when {
-                isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
-                tasks.isEmpty() -> EmptyScreen(navController = navController)
-                else -> TaskListScreen(
-                    tasks = tasks,
-                    onUpdateTasks = { updatedTasks ->
-                        tasks = updatedTasks
-                        FileManager().saveTasksToFile(context, updatedTasks)
-                    },
-                    onOpenCamera = { taskId ->
-                        showCamera = true
-                        selectedTaskId = taskId
-                    }
-                )
+        Box(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+        ) {
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Осталось чуть-чуть...",
+                        color = Color(0xFF2D6230),
+                        fontSize = 24.sp,
+
+                    )
+                }
+            } else {
+                when {
+                    tasks.isEmpty() -> EmptyScreen(navController = navController)
+                    else -> TaskListScreen(
+                        tasks = tasks,
+                        onUpdateTasks = { updatedTasks ->
+                            tasks = updatedTasks
+                            FileManager().saveTasksToFile(context, updatedTasks)
+                        },
+                        onOpenCamera = { taskId ->
+                            showCamera = true
+                            selectedTaskId = taskId
+                        }
+                    )
+                }
             }
         }
     }
