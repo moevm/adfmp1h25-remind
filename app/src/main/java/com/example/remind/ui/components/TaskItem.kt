@@ -3,6 +3,10 @@ package com.example.remind.ui.components
 import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.graphics.BitmapFactory
+import android.net.Uri
+import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -30,8 +34,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.remind.data.FileManager
 
 @Composable
 fun TaskItem(
@@ -40,9 +46,30 @@ fun TaskItem(
     onTaskDeleted: (Task) -> Unit,
     onOpenCamera: (Int) -> Unit
 ) {
+    val context = LocalContext.current
     val dismissState = rememberSwipeToDismissBoxState()
     var showPhotoPicker by remember { mutableStateOf(false) }
     var showFullScreenImage by remember { mutableStateOf(false) }
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent(),
+        onResult = { uri: Uri? ->
+            uri?.let { selectedUri ->
+                val fileManager = FileManager()
+                val savedPath = fileManager.saveImageFromUri(context, selectedUri)
+                val imageDate = fileManager.getImageDateFromUri(context, selectedUri)
+
+                val updatedTask = task.copy(
+                    image = savedPath,
+                    imageDate = imageDate,
+                    completedAt = imageDate,
+                    isCompleted = true
+                )
+                onTaskUpdated(updatedTask)
+
+                showPhotoPicker = false
+            }
+        }
+    )
 
     LaunchedEffect(dismissState.currentValue) {
         if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
@@ -176,7 +203,9 @@ fun TaskItem(
     if (showPhotoPicker) {
         PhotoPickerSheet(
             onDismiss = { showPhotoPicker = false },
-            onPickGallery = { showPhotoPicker = false },
+            onPickGallery = {
+                galleryLauncher.launch("image/*")
+            },
             onTakePhoto = {
                 showPhotoPicker = false
                 onOpenCamera(task.id)
@@ -221,7 +250,6 @@ fun TaskItem(
             }
         }
     }
-
 
 
 }
