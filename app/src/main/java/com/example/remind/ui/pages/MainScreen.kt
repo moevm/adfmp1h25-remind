@@ -89,6 +89,6 @@ fun MainScreen(navController: NavController) {
 //    }
 }
 
-private fun getCurrentTime(): String {
+fun getCurrentTime(): String {
     return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date())
 }
