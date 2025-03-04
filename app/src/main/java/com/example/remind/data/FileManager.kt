@@ -1,8 +1,6 @@
 package com.example.remind.data
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.MediaStore
 import com.example.remind.ui.models.Task
@@ -11,10 +9,7 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
 import java.io.IOException
-import java.io.InputStreamReader
 import java.io.OutputStreamWriter
 import java.text.SimpleDateFormat
 import java.util.Date
