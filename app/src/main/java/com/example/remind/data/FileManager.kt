@@ -42,7 +42,17 @@ class FileManager {
             emptyList()
         }
     }
-
+    fun getImageDateFromUri(context: Context, uri: Uri): String {
+        val projection = arrayOf(MediaStore.Images.Media.DATE_TAKEN)
+        context.contentResolver.query(uri, projection, null, null, null)?.use { cursor ->
+            val columnIndex = cursor.getColumnIndex(MediaStore.Images.Media.DATE_TAKEN)
+            if (cursor.moveToFirst() && columnIndex != -1) {
+                val dateTakenMillis = cursor.getLong(columnIndex)
+                return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault()).format(Date(dateTakenMillis))
+            }
+        }
+        return getCurrentTime()
+    }
     fun saveCategoriesToFile(context: Context, categories: List<String>) {
         val json = gson.toJson(categories)
 
