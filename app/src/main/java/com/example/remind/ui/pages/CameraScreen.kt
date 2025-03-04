@@ -2,6 +2,9 @@ package com.example.remind.ui.pages
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.net.Uri
 import android.util.Log
 import android.widget.Toast
@@ -27,6 +30,25 @@ import coil.compose.rememberAsyncImagePainter
 import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import android.media.ExifInterface
+import java.io.IOException
+
+fun getExifRotation(imagePath: String): Int {
+    return try {
+        val exif = ExifInterface(imagePath)
+        when (exif.getAttributeInt(
+            ExifInterface.TAG_ORIENTATION,
+            ExifInterface.ORIENTATION_NORMAL
+        )) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> 90
+            ExifInterface.ORIENTATION_ROTATE_180 -> 180
+            ExifInterface.ORIENTATION_ROTATE_270 -> 270
+            else -> 0
+        }
+    } catch (e: IOException) {
+        0
+    }
+}
 
 @Composable
 fun CameraScreen(
@@ -85,6 +107,17 @@ fun CameraScreen(
             }
         }, ContextCompat.getMainExecutor(context))
     }
+    fun rotateBitmapIfNeeded(imagePath: String): Bitmap {
+        val rotationAngle = getExifRotation(imagePath)
+        val bitmap = BitmapFactory.decodeFile(imagePath)
+        return if (rotationAngle != 0) {
+            val matrix = Matrix()
+            matrix.postRotate(rotationAngle.toFloat())
+            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+        } else {
+            bitmap
+        }
+    }
 
     fun takePhoto() {
         if (imageCapture == null) {
@@ -92,7 +125,6 @@ fun CameraScreen(
             return
         }
 
-        Log.d("CameraScreen", "Кнопка 'Сделать фото' нажата")
         val file = File(context.externalCacheDir, "photo_${System.currentTimeMillis()}.jpg")
         val outputOptions = ImageCapture.OutputFileOptions.Builder(file).build()
 
@@ -101,9 +133,23 @@ fun CameraScreen(
             executor,
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    capturedImageUri = Uri.fromFile(file)
-                    Log.d("CameraScreen", "Фото сохранено: ${file.absolutePath}")
-                    onImageCaptured(file.absolutePath)
+                    val correctedBitmap = rotateBitmapIfNeeded(file.absolutePath)
+
+                    val correctedFile = File(
+                        context.externalCacheDir,
+                        "corrected_${System.currentTimeMillis()}.jpg"
+                    )
+                    correctedFile.outputStream().use { out ->
+                        correctedBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out)
+                    }
+
+                    capturedImageUri = Uri.fromFile(correctedFile)
+                    onImageCaptured(correctedFile.absolutePath)
+
+                    Log.d(
+                        "CameraScreen",
+                        "Фото сохранено (исправленное): ${correctedFile.absolutePath}"
+                    )
                 }
 
                 override fun onError(exception: ImageCaptureException) {
@@ -112,6 +158,7 @@ fun CameraScreen(
             }
         )
     }
+
 
     Box(
         modifier = Modifier
