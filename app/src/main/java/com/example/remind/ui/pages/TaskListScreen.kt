@@ -291,7 +291,7 @@ fun FilterBottomSheet(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Фильтр",
+                        text = "Фильтрация",
                         fontSize = 23.sp,
                         color = Color.Black,
                         fontWeight = FontWeight.Medium
@@ -319,8 +319,8 @@ fun FilterBottomSheet(
                 listOf(
                     "Только с фото" to TaskFilter.WITH_PHOTO,
                     "Только отмеченные" to TaskFilter.COMPLETED,
-                    "Не отмеченные" to TaskFilter.NOT_COMPLETED,
-                    "Сбросить фильтры" to null
+                    "Только не отмеченные" to TaskFilter.NOT_COMPLETED,
+                    "Без фильтров" to null
                 ).forEach { (text, filter) ->
                     Row(
                         Modifier
