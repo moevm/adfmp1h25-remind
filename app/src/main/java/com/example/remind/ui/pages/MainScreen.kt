@@ -73,20 +73,6 @@ fun MainScreen(navController: NavController) {
         )
     }
 
-//    if (showCamera) {
-//        CameraScreen(
-//            onImageCaptured = { path ->
-//                tasks = tasks.map { task ->
-//                    if (task.id == selectedTaskId) {
-//                        task.copy(image = path)
-//                    } else task
-//                }
-//                FileManager().saveTasksToFile(context, tasks)
-//                showCamera = false
-//            },
-//            onClose = { showCamera = false }
-//        )
-//    }
 }
 
 fun getCurrentTime(): String {
