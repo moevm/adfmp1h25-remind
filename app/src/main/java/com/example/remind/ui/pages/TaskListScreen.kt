@@ -96,13 +96,16 @@ fun TaskListScreen(
             }
         }
         OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth(),
             value = searchQuery,
             onValueChange = {
                 searchQuery = it
             },
             singleLine = true,
             textStyle = TextStyle.Default.copy(fontSize = 18.sp),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            placeholder = {Text("Поиск")}
         )
         TextButton(
             onClick = {
