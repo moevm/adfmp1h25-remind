@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -20,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
@@ -33,11 +35,13 @@ fun TaskListScreen(
 ) {
     var sortDesk by remember { mutableStateOf(false) }
     var filter by remember { mutableStateOf<TaskFilter?>(null) }
+    var searchQuery by remember { mutableStateOf<String>("") }
     val tasksState = remember(tasks) { tasks.toMutableStateList() }
     val hasCompletedTasks = tasksState.any { it.isCompleted }
     //val groupedTasks = tasksState.groupBy { it.category }
     val filteredTasks = applyFilter(tasksState, filter)
-    val groupedTasks = filteredTasks.groupBy { it.category }
+    val searchedTasks = filteredTasks.filter{it.title.contains(searchQuery, true) || it.category.contains(searchQuery, true)}
+    val groupedTasks = searchedTasks.groupBy { it.category }
     fun deleteTask(task: Task) {
         tasksState.remove(task)
         onUpdateTasks(tasksState.toList()) // Обновить список задач
@@ -91,7 +95,15 @@ fun TaskListScreen(
                     functionOptions = listOf({sortTask(1)}, {sortTask(-1)}, {unsortTask()}))
             }
         }
-
+        OutlinedTextField(
+            value = searchQuery,
+            onValueChange = {
+                searchQuery = it
+            },
+            singleLine = true,
+            textStyle = TextStyle.Default.copy(fontSize = 18.sp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text)
+        )
         TextButton(
             onClick = {
                 tasksState.replaceAll {
