@@ -44,11 +44,17 @@ fun TaskListScreen(
     val hasCompletedTasks = tasksState.any { it.isCompleted }
     //val groupedTasks = tasksState.groupBy { it.category }
     val filteredTasks = applyFilter(tasksState, filter)
-    val searchedTasks = filteredTasks.filter{it.title.contains(searchQuery, true) || it.category.contains(searchQuery, true)}
+    val searchedTasks = filteredTasks.filter {
+        it.title.contains(searchQuery, true) || it.category.contains(
+            searchQuery,
+            true
+        )
+    }
     val groupedTasks = searchedTasks.groupBy { it.category }
 
     val savedSortState = remember { fileManager.loadSortState(context) }
     var selectedSortOption by rememberSaveable { mutableStateOf(savedSortState) }
+    var showResetConfirmationDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(selectedSortOption) {
         fileManager.saveSortState(context, selectedSortOption)
@@ -57,26 +63,30 @@ fun TaskListScreen(
         tasksState.remove(task)
         onUpdateTasks(tasksState.toList())
     }
+
     fun sortTask(desc: Int) {
-        tasksState.sortWith(Comparator{a: Task, b: Task->
-            if(a.completedAt.isNullOrBlank()) {
+        tasksState.sortWith(Comparator { a: Task, b: Task ->
+            if (a.completedAt.isNullOrBlank()) {
                 return@Comparator 1             //опускаем неотмеченные дела вниз
             }
-            if( b.completedAt.isNullOrBlank()){
+            if (b.completedAt.isNullOrBlank()) {
                 return@Comparator -1           //опускаем неотмеченные дела вниз
             }
-            if(a.completedAt!! < b.completedAt!!){
-                return@Comparator 1*desc
+            if (a.completedAt!! < b.completedAt!!) {
+                return@Comparator 1 * desc
             }
-            if(a.completedAt!! > b.completedAt!!){
-                return@Comparator -1*desc
+            if (a.completedAt!! > b.completedAt!!) {
+                return@Comparator -1 * desc
             }
             return@Comparator 0
         })
+        onUpdateTasks(tasksState.toList())
     }
-    fun unsortTask(){
+
+    fun unsortTask() {
         tasksState.clear()
         tasksState.addAll(tasks)
+        onUpdateTasks(tasksState.toList())
     }
 
     LaunchedEffect(selectedSortOption) {
@@ -108,7 +118,11 @@ fun TaskListScreen(
                 FilterBottomSheet { selectedFilter ->
                     filter = selectedFilter
                 }
-                askBottomSheet(radioOptions = listOf("Сначала новые отметки", "Сначала старые отметки", "Сбросить сортировку"),
+                askBottomSheet(radioOptions = listOf(
+                    "Сначала новые отметки",
+                    "Сначала старые отметки",
+                    "Сбросить сортировку"
+                ),
                     functionOptions = listOf(
                         {
                             sortTask(1)
@@ -122,7 +136,7 @@ fun TaskListScreen(
                             unsortTask()
                             selectedSortOption = "Сбросить сортировку"
                         }
-                    ),selectedOption = selectedSortOption)
+                    ), selectedOption = selectedSortOption)
             }
         }
         OutlinedTextField(
@@ -135,19 +149,11 @@ fun TaskListScreen(
             singleLine = true,
             textStyle = TextStyle.Default.copy(fontSize = 18.sp),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            placeholder = {Text("Поиск")}
+            placeholder = { Text("Поиск") }
         )
         TextButton(
             onClick = {
-                tasksState.replaceAll {
-                    it.copy(
-                        isCompleted = false,
-                        completedAt = null,
-                        imageDate = null,
-                        image = null
-                    )
-                }
-                onUpdateTasks(tasksState)
+                showResetConfirmationDialog = true
             },
             enabled = hasCompletedTasks
         ) {
@@ -168,14 +174,86 @@ fun TaskListScreen(
                                         if (isCompleted) LocalDateTime.now().toString() else null
                                 }
                                 onUpdateTasks(tasksState.toList())
+                                when (selectedSortOption) {
+                                    "Сначала новые отметки" -> sortTask(1)
+                                    "Сначала старые отметки" -> sortTask(-1)
+                                    "Сбросить сортировку" -> unsortTask()
+                                }
                             }
                         },
                         onTaskDeleted = { task -> deleteTask(task) },
-                        onOpenCamera = { taskId -> onOpenCamera(taskId) }
+                        onOpenCamera = { taskId ->
+                            onOpenCamera(taskId)
+
+                            val index = tasksState.indexOfFirst { it.id == taskId }
+                            if (index != -1) {
+                                val currentTask = tasksState[index]
+                                val updatedTask = currentTask.copy(
+
+                                    completedAt = if (currentTask.isCompleted) {
+                                        currentTask.completedAt
+                                    } else {
+                                        LocalDateTime.now().toString()
+                                    },
+                                    isCompleted = true,
+                                    imageDate = LocalDateTime.now()
+                                        .toString()
+                                )
+                                tasksState[index] = updatedTask
+                                onUpdateTasks(tasksState.toList())
+
+                                when (selectedSortOption) {
+                                    "Сначала новые отметки" -> sortTask(1)
+                                    "Сначала старые отметки" -> sortTask(-1)
+                                    "Сбросить сортировку" -> unsortTask()
+                                }
+                            }
+                        }
                     )
                 }
             }
         }
+    }
+
+    if (showResetConfirmationDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showResetConfirmationDialog = false
+            },
+            title = {
+                Text(text = "Подтверждение")
+            },
+            text = {
+                Text(text = "Вы уверены, что хотите сбросить все отметки?")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        tasksState.replaceAll {
+                            it.copy(
+                                isCompleted = false,
+                                completedAt = null,
+                                imageDate = null,
+                                image = null
+                            )
+                        }
+                        onUpdateTasks(tasksState)
+                        showResetConfirmationDialog = false
+                    }
+                ) {
+                    Text("Да")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showResetConfirmationDialog = false
+                    }
+                ) {
+                    Text("Отмена")
+                }
+            }
+        )
     }
 
     LaunchedEffect(tasksState) {
@@ -186,6 +264,7 @@ fun TaskListScreen(
 enum class TaskFilter {
     WITH_PHOTO, COMPLETED, NOT_COMPLETED
 }
+
 fun applyFilter(tasks: List<Task>, filter: TaskFilter?): List<Task> {
     return when (filter) {
         TaskFilter.WITH_PHOTO -> tasks.filter { it.image != null }
@@ -220,21 +299,22 @@ fun iconSortTime() {
 @Composable
 fun askBottomSheet(
     radioOptions: List<String>,
-    functionOptions: List<()->Unit>,
+    functionOptions: List<() -> Unit>,
     selectedOption: String
-){
+) {
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     var skipPartiallyExpanded by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 //    val (selectedOption, onOptionSelected) = remember { mutableStateOf("") }
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
+    val bottomSheetState =
+        rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
     IconButton(onClick = { openBottomSheet = !openBottomSheet }) {
         Image(
             painter = painterResource(id = R.drawable.sort),
             contentDescription = "Сортировка"
         )
     }
-    if(openBottomSheet) {
+    if (openBottomSheet) {
         ModalBottomSheet(
             onDismissRequest = { openBottomSheet = false },
             shape = RoundedCornerShape(10.dp),
@@ -242,11 +322,12 @@ fun askBottomSheet(
             Column(Modifier.selectableGroup()) {
                 Row(
                     Modifier
-                    .fillMaxWidth()
-                    .padding(top = 0.dp, bottom = 16.dp, start = 150.dp),
+                        .fillMaxWidth()
+                        .padding(top = 0.dp, bottom = 16.dp, start = 150.dp),
 
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically){
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = "Сортировка",
                         fontSize = 23.sp,
@@ -255,22 +336,25 @@ fun askBottomSheet(
                     )
                     TextButton(
                         modifier = Modifier.padding(end = 15.dp),
-                        onClick = {scope
-                            .launch{ bottomSheetState.hide() }
-                            .invokeOnCompletion {
-                                if (!bottomSheetState.isVisible) {
-                                    openBottomSheet = false
+                        onClick = {
+                            scope
+                                .launch { bottomSheetState.hide() }
+                                .invokeOnCompletion {
+                                    if (!bottomSheetState.isVisible) {
+                                        openBottomSheet = false
+                                    }
                                 }
-                            }}
+                        }
                     ) {
-                        Text("Закрыть",
+                        Text(
+                            "Закрыть",
                             fontSize = 15.sp,
                             color = Color.Gray
-                            )
+                        )
                     }
                 }
                 HorizontalDivider()
-                radioOptions.forEachIndexed{id, text ->
+                radioOptions.forEachIndexed { id, text ->
                     Row(
                         Modifier
                             .fillMaxWidth()
@@ -280,13 +364,13 @@ fun askBottomSheet(
                                 onClick = {
                                     openBottomSheet = false
                                     functionOptions[id]()
-                                          },
+                                },
                                 role = Role.RadioButton
                             )
                             .padding(horizontal = 16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
-                    ){
+                    ) {
                         Text(
                             text = text,
                             style = TextStyle.Default.copy(fontSize = 18.sp),
@@ -313,7 +397,8 @@ fun FilterBottomSheet(
     var skipPartiallyExpanded by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val (selectedOption, onOptionSelected) = remember { mutableStateOf<TaskFilter?>(null) }
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
+    val bottomSheetState =
+        rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
 
     IconButton(onClick = { openBottomSheet = !openBottomSheet }) {
         Image(
