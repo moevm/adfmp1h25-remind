@@ -3,7 +3,6 @@ package com.example.remind.ui.pages
 import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -23,7 +22,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.ui.graphics.Color
@@ -34,7 +32,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
@@ -130,13 +127,15 @@ fun NewTaskLayout(navController: NavController) {
         Spacer(modifier = Modifier.height(50.dp))
         Button(
             onClick = {
-                if(taskName.isEmpty()){
+                val taskNameTrimmed = taskName.trim()
+                if(taskNameTrimmed.isEmpty()){
                     highlight = true
+                    taskName = ""
                 }
                 else{
                     val newTask = Task(
                         id = generateId(),
-                        title = taskName,
+                        title = taskNameTrimmed,
                         isCompleted = false,
                         completedAt = null,
                         category = category,
@@ -356,15 +355,17 @@ fun AddCategory(
                         }
                         TextButton(
                             onClick = {
-                                if(newCategory.isEmpty()){
+                                val newCategoryTrimmed = newCategory.trim()
+                                if(newCategoryTrimmed.trim().isEmpty()){
                                     highlightCategory = true
+                                    newCategory = ""
                                 }
                                 else{
                                     openDialog.value = false
                                     val existingCategories = fileManager.loadCategoriesFromFile(context).toMutableList()
-                                    existingCategories.add(newCategory)
+                                    existingCategories.add(newCategoryTrimmed)
                                     fileManager.saveCategoriesToFile(context = context, categories = existingCategories)
-                                    onCreateCategory(newCategory)
+                                    onCreateCategory(newCategoryTrimmed)
                                     newCategory = ""
                                     }
                                 },
