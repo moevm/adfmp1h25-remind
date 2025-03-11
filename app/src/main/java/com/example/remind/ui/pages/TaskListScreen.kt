@@ -1,5 +1,6 @@
 package com.example.remind.ui.pages
 
+import android.content.Context
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +25,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
+import com.example.remind.data.FileManager
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
@@ -31,7 +33,9 @@ import java.time.LocalDateTime
 fun TaskListScreen(
     tasks: List<Task>,
     onUpdateTasks: (List<Task>) -> Unit,
-    onOpenCamera: (Int) -> Unit
+    onOpenCamera: (Int) -> Unit,
+    fileManager: FileManager,
+    context: Context
 ) {
     var sortDesk by remember { mutableStateOf(false) }
     var filter by remember { mutableStateOf<TaskFilter?>(null) }
@@ -42,9 +46,16 @@ fun TaskListScreen(
     val filteredTasks = applyFilter(tasksState, filter)
     val searchedTasks = filteredTasks.filter{it.title.contains(searchQuery, true) || it.category.contains(searchQuery, true)}
     val groupedTasks = searchedTasks.groupBy { it.category }
+
+    val savedSortState = remember { fileManager.loadSortState(context) }
+    var selectedSortOption by rememberSaveable { mutableStateOf(savedSortState) }
+
+    LaunchedEffect(selectedSortOption) {
+        fileManager.saveSortState(context, selectedSortOption)
+    }
     fun deleteTask(task: Task) {
         tasksState.remove(task)
-        onUpdateTasks(tasksState.toList()) // Обновить список задач
+        onUpdateTasks(tasksState.toList())
     }
     fun sortTask(desc: Int) {
         tasksState.sortWith(Comparator{a: Task, b: Task->
@@ -68,7 +79,13 @@ fun TaskListScreen(
         tasksState.addAll(tasks)
     }
 
-
+    LaunchedEffect(selectedSortOption) {
+        when (selectedSortOption) {
+            "Сначала новые отметки" -> sortTask(1)
+            "Сначала старые отметки" -> sortTask(-1)
+            "Сбросить сортировку" -> unsortTask()
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -92,7 +109,20 @@ fun TaskListScreen(
                     filter = selectedFilter
                 }
                 askBottomSheet(radioOptions = listOf("Сначала новые отметки", "Сначала старые отметки", "Сбросить сортировку"),
-                    functionOptions = listOf({sortTask(1)}, {sortTask(-1)}, {unsortTask()}))
+                    functionOptions = listOf(
+                        {
+                            sortTask(1)
+                            selectedSortOption = "Сначала новые отметки"
+                        },
+                        {
+                            sortTask(-1)
+                            selectedSortOption = "Сначала старые отметки"
+                        },
+                        {
+                            unsortTask()
+                            selectedSortOption = "Сбросить сортировку"
+                        }
+                    ),selectedOption = selectedSortOption)
             }
         }
         OutlinedTextField(
@@ -190,12 +220,13 @@ fun iconSortTime() {
 @Composable
 fun askBottomSheet(
     radioOptions: List<String>,
-    functionOptions: List<()->Unit>
+    functionOptions: List<()->Unit>,
+    selectedOption: String
 ){
     var openBottomSheet by rememberSaveable { mutableStateOf(false) }
     var skipPartiallyExpanded by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    val (selectedOption, onOptionSelected) = remember { mutableStateOf("") }
+//    val (selectedOption, onOptionSelected) = remember { mutableStateOf("") }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = skipPartiallyExpanded)
     IconButton(onClick = { openBottomSheet = !openBottomSheet }) {
         Image(
@@ -247,7 +278,6 @@ fun askBottomSheet(
                             .selectable(
                                 selected = (text == selectedOption),
                                 onClick = {
-                                    onOptionSelected(text)
                                     openBottomSheet = false
                                     functionOptions[id]()
                                           },

@@ -24,10 +24,10 @@ fun MainScreen(navController: NavController) {
     val context = LocalContext.current
     var tasks by remember { mutableStateOf(emptyList<Task>()) }
     var isLoading by remember { mutableStateOf(true) }
+    val fileManager = remember { FileManager() }
     var showCamera by remember { mutableStateOf(false) }
     var selectedTaskId by remember { mutableStateOf<Int?>(null) }
     LaunchedEffect(Unit) {
-        val fileManager = FileManager()
         tasks = fileManager.loadTasksFromFile(context)
         isLoading = false
     }
@@ -69,7 +69,9 @@ fun MainScreen(navController: NavController) {
                         onOpenCamera = { taskId ->
                             showCamera = true
                             selectedTaskId = taskId
-                        }
+                        },
+                        fileManager = fileManager,
+                        context = context
                     )
                 }
             }
