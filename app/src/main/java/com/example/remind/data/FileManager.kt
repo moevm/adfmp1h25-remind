@@ -89,4 +89,28 @@ class FileManager {
         }
     }
 
+    fun saveSortState(context: Context, sortState: String) {
+        val json = gson.toJson(sortState)
+
+        try {
+            val fos = context.openFileOutput("sort_state.json", Context.MODE_PRIVATE)
+            val writer = OutputStreamWriter(fos)
+            writer.use { it.write(json) }
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+
+    fun loadSortState(context: Context): String {
+        return try {
+            context.openFileInput("sort_state.json").use { stream ->
+                val reader = stream.bufferedReader()
+                val jsonString = reader.lineSequence().joinToString("\n")
+                if (jsonString.isBlank()) "" else gson.fromJson(jsonString, String::class.java)
+            }
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
 }
